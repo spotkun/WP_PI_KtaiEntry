@@ -473,13 +473,24 @@ private function pickup_rfc2822_address($field) {
  * @return	string   $sender
  */
 private function read_sender($structure) {
-	$senders = $this->pickup_rfc2822_address(trim($structure->headers['from']));
-	$sender = $senders[0];
-	if (! $sender) {
-		$senders = $this->pickup_rfc2822_address($_ENV['SENDER']);
-		$sender = $senders[0];
+
+	// Original
+	// Read sender(s) from From-Fields/ Envelop From-Fields
+	// $senders = $this->pickup_rfc2822_address(trim($structure->headers['from']));
+	// $sender = $senders[0];
+	// if (! $sender) {
+	// 	$senders = $this->pickup_rfc2822_address($_ENV['SENDER']);
+	// 	$sender = $senders[0];
+	// }
+	
+	//Read sender(s) from To-Field
+	//And Fix Return Value :Array to :string
+	$sender = $this->pickup_rfc2822_address(trim($structure->headers['to']));
+	//            + $this->pickup_rfc2822_address(trim($structure->headers['cc']));
+	if (count($sender) > 0){
+		return $sender[0];
 	}
-	return $sender;
+	return "";
 }
 
 /* ==================================================
@@ -487,8 +498,17 @@ private function read_sender($structure) {
  * @return	array    $recipients
  */
 private function read_recipients($structure) {
-	$recipients = $this->pickup_rfc2822_address(trim($structure->headers['to'])) 
-	            + $this->pickup_rfc2822_address(trim($structure->headers['cc']));
+	// Original
+	// Read recipient(s) from To-Fields/ Cc-Fields
+	// $recipients = $this->pickup_rfc2822_address(trim($structure->headers['to'])) 
+	//             + $this->pickup_rfc2822_address(trim($structure->headers['cc']));
+
+	//Read recipient(s) from From-Field
+	$recipients = $this->pickup_rfc2822_address(trim($structure->headers['from']));
+	if (! $recipients) {
+		$recipients = $this->pickup_rfc2822_address($_ENV['SENDER']);
+		$sender = $recipients[0];
+	}
 	return $recipients;
 }
 
